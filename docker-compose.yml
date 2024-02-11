@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  palworld-dedicated-server:
+    container_name: palworld-dedicated-server
+    image: jammsen/palworld-dedicated-server:latest
+    restart: unless-stopped
+    ports:
+      - target: 8211
+        published: 8211
+        protocol: udp
+        mode: host
+      - target: 25575
+        published: 25575
+        protocol: tcp
+        mode: host
+    env_file:
+      - ./palworld.env
+    volumes:
+      - ./game:/palworld
+
+  fastapi-app:
+    container_name: fastapi-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Mount the Docker socket
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock

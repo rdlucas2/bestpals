@@ -1,0 +1,17 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/coverage
+**/.env
+**/.aws
+**/.ssh
+Dockerfile
+README.md
+docker-compose.yml
+**/.DS_Store
+**/venv
+**/env
+palworld.env
+local.env
+sonar-project.properties
+game/
