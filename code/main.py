@@ -170,7 +170,7 @@ def clean_backups(days: int):
     client = get_docker_client()
     try:
         exec_id = client.api.exec_create(
-            palworld_container_name, cmd=["backup_clean", str(days)]
+            palworld_container_name, cmd=["backup", "clean", str(days)]
         )
         result = client.api.exec_start(exec_id=exec_id)
         return {"output": result.decode("utf-8")}
