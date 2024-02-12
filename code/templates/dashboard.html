@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Palworld Server Dashboard</h1>
+    <ul>
+        <li><a href="/status">Server Status</a></li>
+        <li><a href="/toggle-pause">Toggle Pause</a></li>
+        <li><a href="/show-players">Show Players</a></li>
+        <li><a href="/server-info">Server Info</a></li>
+        <li><a href="/save-game">Save Game</a></li>
+        <li><a href="/create-backup">Create Backup</a></li>
+        <li><a href="/list-backups">List Backups</a></li>
+        <li><a href="/clean-backups/3">Clean Backups (3 Days)</a></li>
+        <li><a href="/dashboard-data">Dashboard Data</a></li>
+    </ul>
+    <div id="dashboard-data">
+        <!-- Dashboard data will be inserted here -->
+    </div>
+
+    <script>
+        fetch('/dashboard-data').then(response => response.json()).then(data => {
+            document.getElementById('dashboard-data').innerText = JSON.stringify(data, null, 2);
+        });
+    </script>
+</body>
+</html>

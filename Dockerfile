@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools && \
     pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY ./code/main.py /code/main.py
+COPY ./code/templates /code/templates
 
 CMD ["/bin/sh"]
 
