@@ -66,3 +66,17 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
 ```
 
+sequenceDiagram
+    participant User as User
+    participant DNS as DNS
+    participant Cloudflare as Cloudflare Tunnel
+    participant Authelia as Authelia
+    participant FastAPI as FastAPI Server
+
+    User->>DNS: Request to access the service
+    DNS->>Cloudflare: Resolves to Cloudflare Tunnel
+    Cloudflare->>Authelia: Forwards request for authentication
+    Authelia->>Cloudflare: Authentication successful
+    Cloudflare->>FastAPI: Forwards authenticated request
+    FastAPI->>Cloudflare: Responds to request
+    Cloudflare->>User: Returns response
