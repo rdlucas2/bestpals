@@ -1,30 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    <style>
+        #message-box,
+        #dashboard-data-box {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
+
 <body>
     <h1>Palworld Server Dashboard</h1>
-    <ul>
-        <li><a href="/status">Server Status</a></li>
-        <li><a href="/toggle-pause">Toggle Pause</a></li>
-        <li><a href="/show-players">Show Players</a></li>
-        <li><a href="/server-info">Server Info</a></li>
-        <li><a href="/save-game">Save Game</a></li>
-        <li><a href="/create-backup">Create Backup</a></li>
-        <li><a href="/list-backups">List Backups</a></li>
-        <li><a href="/clean-backups/3">Clean Backups (3 Days)</a></li>
-        <li><a href="/dashboard-data">Dashboard Data</a></li>
-    </ul>
-    <div id="dashboard-data">
-        <!-- Dashboard data will be inserted here -->
+    <div>
+        <button onclick="fireRequestAndDisplayResponse('/status')">Server Status</button>
+        <button onclick="fireRequestAndDisplayResponse('/toggle-pause')">Toggle Pause</button>
+        <button onclick="fireRequestAndDisplayResponse('/show-players')">Show Players</button>
+        <button onclick="fireRequestAndDisplayResponse('/server-info')">Server Info</button>
+        <button onclick="fireRequestAndDisplayResponse('/save-game')">Save Game</button>
+        <button onclick="fireRequestAndDisplayResponse('/create-backup')">Create Backup</button>
+        <button onclick="fireRequestAndDisplayResponse('/list-backups')">List Backups</button>
+        <button onclick="fireRequestAndDisplayResponse('/clean-backups/3')">Clean Backups (3 Days)</button>
     </div>
+    <h2>Command Results</h2>
+    <div id="message-box"></div>
+    <h2>Dashboard Data (Auto-refreshes every 5 minutes)</h2>
+    <button onclick="refreshDashboardData()">Refresh Dashboard Data</button>
+    <div id="dashboard-data-box"></div>
 
     <script>
-        fetch('/dashboard-data').then(response => response.json()).then(data => {
-            document.getElementById('dashboard-data').innerText = JSON.stringify(data, null, 2);
-        });
+        function fireRequestAndDisplayResponse(route) {
+            fetch(route).then(response => response.json()).then(data => {
+                const messageBox = document.getElementById('message-box');
+                const message = document.createElement('p');
+                message.innerText = `${new Date().toLocaleTimeString()} [${route}] - ${JSON.stringify(data)}`;
+                messageBox.appendChild(message);
+                messageBox.scrollTop = messageBox.scrollHeight; // Auto-scroll to the latest message
+            }).catch(error => {
+                const messageBox = document.getElementById('message-box');
+                const message = document.createElement('p');
+                message.innerText = `${new Date().toLocaleTimeString()} [${route}] - Error: ${error}`;
+                messageBox.appendChild(message);
+                messageBox.scrollTop = messageBox.scrollHeight; // Auto-scroll to the latest message
+            });
+        }
+
+        function refreshDashboardData() {
+            fetch('/dashboard-data').then(response => response.json()).then(data => {
+                const dashboardDataBox = document.getElementById('dashboard-data-box');
+                // Set the innerText of the dashboard-data-box to the new data, replacing any existing content
+                dashboardDataBox.innerText = JSON.stringify(data, null, 2);
+            }).catch(error => {
+                // In case of an error, replace the content with the error message
+                dashboardDataBox.innerText = `Error: ${error}`;
+            });
+        }
+
+        // Initial load of dashboard data
+        refreshDashboardData();
+
+        // Set interval to refresh dashboard data every 5 minutes (300000 milliseconds)
+        setInterval(refreshDashboardData, 300000);
     </script>
 </body>
+
 </html>
