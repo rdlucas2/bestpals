@@ -66,17 +66,26 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
 ```
 
+## A diagram of a possible stack, and the flow for requests.
+```mermaid
 sequenceDiagram
     participant User as User
     participant DNS as DNS
     participant Cloudflare as Cloudflare Tunnel
     participant Authelia as Authelia
     participant FastAPI as FastAPI Server
+    participant Docker as Docker Daemon
 
     User->>DNS: Request to access the service
     DNS->>Cloudflare: Resolves to Cloudflare Tunnel
     Cloudflare->>Authelia: Forwards request for authentication
     Authelia->>Cloudflare: Authentication successful
     Cloudflare->>FastAPI: Forwards authenticated request
+    FastAPI->>Docker: Sends command to Palworld server container
+    Docker->>FastAPI: Confirms action completion
     FastAPI->>Cloudflare: Responds to request
     Cloudflare->>User: Returns response
+```
+
+## TODO:
+- because palworld has known memory leak, have a timed backup/broadcast/restart sequence.

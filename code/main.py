@@ -3,7 +3,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 import docker
 import httpx
+import os
 import re
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -194,3 +196,29 @@ def clean_backups(days: int):
         raise HTTPException(
             status_code=500, detail=f"Docker API error: {e.explanation}"
         )
+
+@app.get("/memory-usage")
+def get_container_memory_usage():
+    client = get_docker_client()
+    try:
+        container = client.containers.get(palworld_container_name)
+        stats = container.stats(stream=False)  # Get the current stats, stream=False to get only the current stats snapshot
+
+        # Memory usage calculation
+        memory_usage = stats['memory_stats']['usage']
+        memory_limit = stats['memory_stats']['limit']
+        memory_usage_mb = memory_usage / 1024 / 1024  # Convert to MB
+        memory_limit_mb = memory_limit / 1024 / 1024  # Convert to MB
+        memory_usage_percentage = (memory_usage / memory_limit) * 100
+
+        return {
+            "memory_usage_mb": memory_usage_mb,
+            "memory_limit_mb": memory_limit_mb,
+            "memory_usage_percentage": memory_usage_percentage
+        }
+    except docker.errors.NotFound:
+        raise HTTPException(status_code=404, detail=f"Container '{palworld_container_name}' not found")
+    except docker.errors.APIError as e:
+        raise HTTPException(status_code=500, detail=f"Docker API error: {e.explanation}")
+    except KeyError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to parse container stats: {e}")
