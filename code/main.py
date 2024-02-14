@@ -3,6 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 import docker
 import httpx
+import re
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -13,6 +14,13 @@ def get_docker_client():
 
 
 palworld_container_name = "palworld-dedicated-server"
+
+def clean_ansi_sequences(text):
+    # ANSI escape sequences regex pattern
+    ansi_escape_pattern = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
+    return ansi_escape_pattern.sub('', text)
+
+
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -90,7 +98,7 @@ def show_players():
             palworld_container_name, cmd=["rconcli", "showplayers"]
         )
         result = client.api.exec_start(exec_id=exec_id)
-        return {"output": result.decode("utf-8")}
+        return {"output": clean_ansi_sequences(result.decode("utf-8"))}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
     except docker.errors.APIError as e:
@@ -107,7 +115,7 @@ def server_info():
             palworld_container_name, cmd=["rconcli", "info"]
         )
         result = client.api.exec_start(exec_id=exec_id)
-        return {"output": result.decode("utf-8")}
+        return {"output": clean_ansi_sequences(result.decode("utf-8"))}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
     except docker.errors.APIError as e:
@@ -124,7 +132,7 @@ def save_game():
             palworld_container_name, cmd=["rconcli", "save"]
         )
         result = client.api.exec_start(exec_id=exec_id)
-        return {"output": result.decode("utf-8")}
+        return {"output": clean_ansi_sequences(result.decode("utf-8"))}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
     except docker.errors.APIError as e:
@@ -139,7 +147,7 @@ def create_backup():
     try:
         exec_id = client.api.exec_create(palworld_container_name, cmd=["backup"])
         result = client.api.exec_start(exec_id=exec_id)
-        return {"output": result.decode("utf-8")}
+        return {"output": clean_ansi_sequences(result.decode("utf-8"))}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
     except docker.errors.APIError as e:
@@ -156,7 +164,7 @@ def list_backups():
             palworld_container_name, cmd=["backup", "list"]
         )
         result = client.api.exec_start(exec_id=exec_id)
-        return {"output": result.decode("utf-8")}
+        return {"output": clean_ansi_sequences(result.decode("utf-8"))}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
     except docker.errors.APIError as e:
@@ -173,7 +181,7 @@ def clean_backups(days: int):
             palworld_container_name, cmd=["backup", "clean", str(days)]
         )
         result = client.api.exec_start(exec_id=exec_id)
-        return {"output": result.decode("utf-8")}
+        return {"output": clean_ansi_sequences(result.decode("utf-8"))}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
     except docker.errors.APIError as e:
