@@ -51,12 +51,16 @@ async def get_dashboard_data():
             backups_response = await client.get(f"{base_url}/list-backups")
             backups = backups_response.json()
 
+            memory_response = await client.get(f"{base_url}/memory-usage")
+            memory_usage = memory_response.json()
+
             return {
                 "dashboard": {
                     "server_status": server_status,
                     "players": players,
                     "server_info": server_info,
                     "backups": backups,
+                    "memory_usage": memory_usage,
                 }
             }
         except httpx.HTTPError as e:
