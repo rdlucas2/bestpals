@@ -13,14 +13,15 @@ def get_docker_client():
     return docker.from_env()
 
 
-palworld_container_name = "palworld-dedicated-server"
+palworld_container_name = os.getenv(
+    "PALWORLD_CONTAINER_NAME", "palworld-dedicated-server"
+)
+
 
 def clean_ansi_sequences(text):
     # ANSI escape sequences regex pattern
-    ansi_escape_pattern = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-    return ansi_escape_pattern.sub('', text)
-
-
+    ansi_escape_pattern = re.compile(r"\x1B[@-_][0-?]*[ -/]*[@-~]")
+    return ansi_escape_pattern.sub("", text)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -31,7 +32,9 @@ def get_dashboard(request: Request):
 @app.get("/dashboard-data")
 async def get_dashboard_data():
     async with httpx.AsyncClient() as client:
-        base_url = "http://localhost:8000"  # Use the appropriate base URL for your application
+        base_url = (
+            "http://localhost:8000"  # Use the appropriate base URL for your application
+        )
 
         try:
             server_status_response = await client.get(f"{base_url}/status")
@@ -51,11 +54,14 @@ async def get_dashboard_data():
                     "server_status": server_status,
                     "players": players,
                     "server_info": server_info,
-                    "backups": backups
+                    "backups": backups,
                 }
             }
         except httpx.HTTPError as e:
-            raise HTTPException(status_code=500, detail=f"Internal server request failed: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Internal server request failed: {e}"
+            )
+
 
 @app.get("/status")
 def get_server_status():
