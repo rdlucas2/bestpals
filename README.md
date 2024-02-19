@@ -2,6 +2,8 @@
 
 A Python FastAPI app intended to be used with https://github.com/jammsen/docker-palworld-dedicated-server for allowing requests to start/stop a server on-demand.
 
+<img src=./screenshot.png>
+
 ### Test:
 ```
 docker build -t bestpals:test --target test .
